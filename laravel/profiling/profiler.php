@@ -27,7 +27,11 @@ class Profiler {
 		// We only want to send the profiler toolbar if the request is not an AJAX
 		// request, as sending it on AJAX requests could mess up JSON driven API
 		// type applications, so we will not send anything in those scenarios.
-		if ( ! Request::ajax() and Config::get('application.profiler') )
+
+        // Also avoid non-html respones, eg. js/css rendered through Laravel.
+        $isHtml = \Str::is('text/htm*', $response->headers()->get('Content-Type'));
+
+		if ( ! Request::ajax() and $isHtml and Config::get('application.profiler') )
 		{
 			static::$data['memory'] = get_file_size(memory_get_usage(true));
 			static::$data['memory_peak'] = get_file_size(memory_get_peak_usage(true));
